@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Speak & Click Lab 🚀</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --space-dark:#03060F;
+      --space-navy:#050D1A;
+      --space-blue:#0A1628;
+      --neon-blue:#00D4FF;
+      --neon-purple:#B44FFF;
+      --neon-green:#00FF88;
+      --neon-yellow:#FFE500;
+      --neon-pink:#FF3CA0;
+      --neon-orange:#FF6B00;
+      --star-white:#E8F4FD;
+      --text-body:#A8C5DA;
+      --card-bg:rgba(10,22,40,0.85);
+      --card-border:rgba(0,212,255,0.2);
+      --glow-blue:0 0 20px rgba(0,212,255,0.4);
+      --glow-purple:0 0 20px rgba(180,79,255,0.4);
+      --glow-green:0 0 20px rgba(0,255,136,0.4);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      font-family:'Exo 2',sans-serif;
+      background:var(--space-dark);
+      color:var(--text-body);
+      overflow-x:hidden;
+      cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='4' fill='%2300D4FF'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%2300D4FF' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E") 12 12, crosshair;
+    }
+
+    /* ══ STARFIELD ══ */
+    #starfield{position:fixed;inset:0;z-index:0;pointer-events:none;}
+    .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--del,0s);}
+    @keyframes twinkle{0%,100%{opacity:var(--o1,.3);transform:scale(1)}50%{opacity:var(--o2,1);transform:scale(1.3)}}
+
+    /* ══ SHOOTING STAR ══ */
+    .shoot{position:fixed;top:0;left:0;width:2px;height:80px;
+      background:linear-gradient(180deg,#fff,transparent);
+      border-radius:2px;animation:shoot 6s linear infinite;z-index:1;pointer-events:none;}
+    .shoot:nth-child(2){animation-delay:2s;left:30%;}
+    .shoot:nth-child(3){animation-delay:4s;left:70%;}
+    @keyframes shoot{0%{transform:translateY(-100px) rotate(15deg);opacity:1}
+      80%{opacity:.8}100%{transform:translateY(110vh) rotate(15deg);opacity:0}}
+
+    /* ══ NEBULA BG ══ */
+    body::before{content:'';position:fixed;inset:0;z-index:0;
+      background:
+        radial-gradient(ellipse 60% 40% at 20% 30%,rgba(180,79,255,0.08) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 70%,rgba(0,212,255,0.07) 0%,transparent 60%),
+        radial-gradient(ellipse 40% 30% at 50% 80%,rgba(0,255,136,0.05) 0%,transparent 60%),
+        var(--space-dark);
+      pointer-events:none;}
+
+    /* ══ NAVBAR ══ */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      padding:0 40px;height:70px;
+      display:flex;align-items:center;justify-content:space-between;
+      background:rgba(3,6,15,0.85);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(0,212,255,0.15);
+    }
+    .nav-logo{
+      font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;
+      color:var(--neon-blue);text-shadow:var(--glow-blue);
+      display:flex;align-items:center;gap:10px;text-decoration:none;
+    }
+    .nav-logo span{font-size:1.4rem;}
+    .nav-links{display:flex;gap:6px;}
+    .nav-link{
+      font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;
+      padding:7px 14px;border-radius:6px;text-decoration:none;
+      border:1px solid transparent;color:var(--text-body);
+      transition:all .25s;letter-spacing:.05em;text-transform:uppercase;
+    }
+    .nav-link:hover,.nav-link.active{
+      color:var(--neon-blue);border-color:rgba(0,212,255,0.4);
+      background:rgba(0,212,255,0.08);text-shadow:var(--glow-blue);
+    }
+    .nav-burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;}
+    .nav-burger span{width:24px;height:2px;background:var(--neon-blue);border-radius:2px;transition:all .3s;}
+
+    /* ══ HERO ══ */
+    #home{
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:100px 24px 60px;text-align:center;
+      position:relative;z-index:1;
+    }
+    .hero-badge{
+      font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;
+      letter-spacing:.2em;text-transform:uppercase;
+      color:var(--neon-green);border:1px solid rgba(0,255,136,0.3);
+      padding:8px 20px;border-radius:50px;margin-bottom:32px;
+      background:rgba(0,255,136,0.06);display:inline-block;
+      animation:pulse-badge 3s ease-in-out infinite;
+    }
+    @keyframes pulse-badge{0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,0.2)}50%{box-shadow:0 0 0 8px rgba(0,255,136,0)}}
+    .hero-rocket{font-size:5rem;display:block;margin-bottom:16px;animation:float 4s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-20px) rotate(5deg)}}
+    .hero-title{
+      font-family:'Orbitron',monospace;font-weight:900;
+      font-size:clamp(2.2rem,6vw,5.5rem);
+      line-height:1.05;margin-bottom:12px;
+      background:linear-gradient(135deg,var(--neon-blue) 0%,var(--neon-purple) 50%,var(--neon-pink) 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      animation:fadeUp .8s ease both;
+    }
+    .hero-sub{
+      font-family:'Orbitron',monospace;font-size:clamp(.9rem,2vw,1.3rem);
+      color:var(--neon-blue);letter-spacing:.1em;margin-bottom:24px;
+      animation:fadeUp .8s .15s ease both;opacity:0;
+    }
+    .hero-desc{
+      max-width:660px;font-size:1.05rem;line-height:1.75;
+      color:var(--text-body);margin-bottom:40px;
+      animation:fadeUp .8s .3s ease both;opacity:0;
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    .hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;animation:fadeUp .8s .45s ease both;opacity:0;}
+    .btn-primary{
+      font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;
+      padding:16px 36px;border-radius:8px;border:none;cursor:pointer;
+      background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));
+      color:#fff;text-decoration:none;display:inline-block;letter-spacing:.08em;
+      box-shadow:0 0 30px rgba(0,212,255,0.3),0 0 60px rgba(180,79,255,0.15);
+      transition:transform .2s,box-shadow .2s;text-transform:uppercase;
+    }
+    .btn-primary:hover{transform:translateY(-3px);box-shadow:0 0 40px rgba(0,212,255,0.5),0 0 80px rgba(180,79,255,0.3);}
+    .btn-secondary{
+      font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;
+      padding:15px 36px;border-radius:8px;cursor:pointer;text-decoration:none;
+      border:1px solid rgba(0,212,255,0.4);color:var(--neon-blue);
+      background:rgba(0,212,255,0.06);letter-spacing:.08em;display:inline-block;
+      transition:all .2s;text-transform:uppercase;
+    }
+    .btn-secondary:hover{background:rgba(0,212,255,0.15);border-color:var(--neon-blue);transform:translateY(-3px);}
+
+    .hero-stats{
+      display:flex;gap:48px;margin-top:60px;flex-wrap:wrap;justify-content:center;
+      animation:fadeUp .8s .6s ease both;opacity:0;
+    }
+    .stat{text-align:center;}
+    .stat-num{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--neon-blue);line-height:1;}
+    .stat-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;margin-top:4px;color:var(--text-body);}
+
+    /* ══ SECTIONS COMMON ══ */
+    .section{position:relative;z-index:1;padding:100px 40px;}
+    .section-inner{max-width:1200px;margin:0 auto;}
+    .section-eyebrow{
+      font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;
+      letter-spacing:.25em;text-transform:uppercase;color:var(--neon-green);
+      margin-bottom:12px;
+    }
+    .section-title{
+      font-family:'Orbitron',monospace;font-weight:900;
+      font-size:clamp(1.8rem,4vw,3rem);
+      color:var(--star-white);line-height:1.1;margin-bottom:16px;
+    }
+    .section-title span{
+      background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .section-desc{max-width:600px;font-size:1rem;line-height:1.75;color:var(--text-body);margin-bottom:56px;}
+    .divider{width:60px;height:3px;border-radius:2px;margin-bottom:40px;
+      background:linear-gradient(90deg,var(--neon-blue),var(--neon-purple));}
+
+    /* ══ ABOUT ══ */
+    #about{background:linear-gradient(180deg,transparent,rgba(0,212,255,0.03),transparent);}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+    .about-visual{position:relative;}
+    .planet{
+      width:280px;height:280px;border-radius:50%;margin:0 auto;
+      background:radial-gradient(circle at 35% 35%,rgba(0,212,255,0.3),rgba(180,79,255,0.4),rgba(0,10,30,0.9));
+      box-shadow:0 0 80px rgba(0,212,255,0.2),0 0 160px rgba(180,79,255,0.1),inset 0 0 60px rgba(0,0,0,0.5);
+      animation:rotate-planet 20s linear infinite;position:relative;
+    }
+    @keyframes rotate-planet{from{box-shadow:0 0 80px rgba(0,212,255,0.2),0 0 160px rgba(180,79,255,0.1),inset 0 0 60px #000a}
+      50%{box-shadow:0 0 80px rgba(180,79,255,0.3),0 0 160px rgba(0,212,255,0.15),inset 0 0 60px #000a}
+      to{box-shadow:0 0 80px rgba(0,212,255,0.2),0 0 160px rgba(180,79,255,0.1),inset 0 0 60px #000a}}
+    .planet-ring{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotateX(75deg);
+      width:380px;height:380px;border-radius:50%;
+      border:12px solid rgba(0,212,255,0.15);
+      box-shadow:0 0 30px rgba(0,212,255,0.1);
+    }
+    .orbit-dot{
+      position:absolute;width:12px;height:12px;border-radius:50%;
+      background:var(--neon-blue);box-shadow:var(--glow-blue);
+      animation:orbit 8s linear infinite;top:calc(50% - 6px);left:calc(50% - 6px);
+      transform-origin:-130px 0;
+    }
+    .orbit-dot:nth-child(2){background:var(--neon-purple);box-shadow:var(--glow-purple);animation-delay:-4s;transform-origin:-160px 0;width:8px;height:8px;}
+    @keyframes orbit{from{transform:rotate(0deg) translateX(130px)}to{transform:rotate(360deg) translateX(130px)}}
+    .about-pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px;}
+    .pill{
+      font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;
+      padding:8px 16px;border-radius:50px;letter-spacing:.05em;text-transform:uppercase;
+      border:1px solid;
+    }
+    .pill-blue{color:var(--neon-blue);border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.06);}
+    .pill-purple{color:var(--neon-purple);border-color:rgba(180,79,255,0.3);background:rgba(180,79,255,0.06);}
+    .pill-green{color:var(--neon-green);border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.06);}
+    .pill-yellow{color:var(--neon-yellow);border-color:rgba(255,229,0,0.3);background:rgba(255,229,0,0.06);}
+    .about-list{list-style:none;}
+    .about-list li{
+      padding:14px 0;border-bottom:1px solid rgba(0,212,255,0.08);
+      display:flex;gap:14px;align-items:flex-start;font-size:.97rem;line-height:1.6;
+    }
+    .about-list li::before{content:'▶';color:var(--neon-blue);font-size:.7rem;margin-top:4px;flex-shrink:0;}
+
+    /* ══ ZONES ══ */
+    #zones{background:linear-gradient(180deg,transparent,rgba(180,79,255,0.03),transparent);}
+    .zones-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;}
+    .zone-card{
+      background:var(--card-bg);border:1px solid var(--card-border);
+      border-radius:16px;padding:36px 32px;
+      backdrop-filter:blur(20px);position:relative;overflow:hidden;
+      transition:transform .3s,border-color .3s,box-shadow .3s;
+    }
+    .zone-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:var(--zone-color,var(--neon-blue));
+    }
+    .zone-card::after{
+      content:'';position:absolute;inset:0;border-radius:16px;
+      background:radial-gradient(ellipse at top,var(--zone-glow,rgba(0,212,255,0.05)) 0%,transparent 60%);
+      pointer-events:none;
+    }
+    .zone-card:hover{transform:translateY(-6px);border-color:var(--zone-border,rgba(0,212,255,0.4));box-shadow:var(--zone-shadow,var(--glow-blue));}
+    .zone-num{
+      font-family:'Orbitron',monospace;font-size:3.5rem;font-weight:900;
+      color:var(--zone-color,var(--neon-blue));opacity:.15;
+      position:absolute;top:20px;right:28px;line-height:1;
+    }
+    .zone-icon{font-size:2.5rem;margin-bottom:16px;display:block;}
+    .zone-tag{
+      font-family:'Space Mono',monospace;font-size:.65rem;font-weight:700;
+      letter-spacing:.2em;text-transform:uppercase;
+      color:var(--zone-color,var(--neon-blue));margin-bottom:8px;display:block;
+    }
+    .zone-title{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:700;color:var(--star-white);margin-bottom:10px;}
+    .zone-desc{font-size:.92rem;line-height:1.7;color:var(--text-body);margin-bottom:20px;}
+    .zone-activities{list-style:none;}
+    .zone-activities li{
+      font-size:.85rem;padding:6px 0;color:var(--text-body);
+      display:flex;gap:10px;align-items:center;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    .zone-activities li:last-child{border-bottom:none;}
+    .zone-activities li::before{content:'◈';color:var(--zone-color,var(--neon-blue));font-size:.7rem;}
+    .zone-goal{
+      margin-top:18px;padding:10px 14px;border-radius:8px;
+      background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+      font-size:.82rem;color:var(--zone-color,var(--neon-blue));font-weight:600;
+    }
+    .zone-goal strong{color:var(--star-white);}
+
+    /* ══ INTERACTIVE ACTIVITIES ══ */
+    #activities{background:linear-gradient(180deg,transparent,rgba(0,255,136,0.03),transparent);}
+    .act-tabs{display:flex;gap:8px;margin-bottom:40px;flex-wrap:wrap;}
+    .act-tab{
+      font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;
+      padding:10px 20px;border-radius:8px;cursor:pointer;
+      border:1px solid rgba(0,212,255,0.2);color:var(--text-body);
+      background:rgba(0,212,255,0.04);letter-spacing:.08em;text-transform:uppercase;
+      transition:all .2s;
+    }
+    .act-tab:hover,.act-tab.active{
+      color:var(--neon-blue);border-color:var(--neon-blue);
+      background:rgba(0,212,255,0.12);box-shadow:var(--glow-blue);
+    }
+    .act-panel{display:none;}
+    .act-panel.active{display:block;animation:fadeUp .4s ease;}
+
+    /* Zone 1: flashcards */
+    .flashcard-section{display:flex;flex-direction:column;align-items:center;gap:28px;}
+    .fc-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+    .fc{
+      width:130px;height:130px;perspective:800px;cursor:pointer;
+      position:relative;
+    }
+    .fc-inner{
+      width:100%;height:100%;transform-style:preserve-3d;
+      transition:transform .5s cubic-bezier(.4,0,.2,1);position:relative;
+    }
+    .fc.flipped .fc-inner{transform:rotateY(180deg);}
+    .fc-f,.fc-b{
+      position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:12px;border:1px solid;
+    }
+    .fc-f{
+      background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(180,79,255,0.08));
+      border-color:rgba(0,212,255,0.25);
+    }
+    .fc-b{
+      background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,212,255,0.08));
+      border-color:rgba(0,255,136,0.25);transform:rotateY(180deg);
+    }
+    .fc-f:hover{border-color:rgba(0,212,255,0.5);box-shadow:var(--glow-blue);}
+    .fc-emoji{font-size:2.5rem;margin-bottom:6px;}
+    .fc-label{font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;color:var(--star-white);text-align:center;letter-spacing:.05em;}
+    .fc-hint{font-size:.6rem;color:var(--text-body);margin-top:4px;letter-spacing:.05em;}
+    .fc-back-word{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;color:var(--neon-green);text-align:center;}
+    .fc-back-sub{font-size:.7rem;color:var(--text-body);margin-top:4px;}
+    .fc-back-btn{
+      margin-top:8px;padding:4px 10px;border-radius:6px;border:none;cursor:pointer;
+      background:rgba(0,255,136,0.15);color:var(--neon-green);font-size:.65rem;
+      font-family:'Space Mono',monospace;font-weight:700;
+    }
+    .fc-controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+    .fc-cat-btn{
+      font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;
+      padding:8px 16px;border-radius:6px;border:1px solid;cursor:pointer;
+      transition:all .2s;letter-spacing:.05em;text-transform:uppercase;
+    }
+
+    /* Zone 2: matching game */
+    .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+    .match-col h4{
+      font-family:'Orbitron',monospace;font-size:.8rem;font-weight:700;
+      color:var(--neon-purple);letter-spacing:.1em;text-transform:uppercase;
+      margin-bottom:16px;
+    }
+    .match-item{
+      background:rgba(180,79,255,0.08);border:1px solid rgba(180,79,255,0.2);
+      border-radius:10px;padding:14px 18px;margin-bottom:10px;cursor:pointer;
+      font-size:.95rem;color:var(--text-body);transition:all .2s;
+      display:flex;align-items:center;gap:12px;
+      font-family:'Exo 2',sans-serif;font-weight:600;
+    }
+    .match-item:hover{border-color:rgba(180,79,255,0.5);background:rgba(180,79,255,0.15);color:var(--star-white);}
+    .match-item.selected{border-color:var(--neon-purple);background:rgba(180,79,255,0.2);color:var(--star-white);box-shadow:var(--glow-purple);}
+    .match-item.matched{border-color:var(--neon-green);background:rgba(0,255,136,0.1);color:var(--neon-green);cursor:default;}
+    .match-item.wrong{border-color:var(--neon-pink);background:rgba(255,60,160,0.1);animation:shake .4s;}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+    .match-score{
+      text-align:center;margin-top:20px;
+      font-family:'Orbitron',monospace;font-size:.9rem;color:var(--neon-green);
+    }
+
+    /* Zone 3: speaking */
+    .speak-arena{max-width:700px;margin:0 auto;}
+    .speak-card{
+      background:var(--card-bg);border:1px solid rgba(255,101,0,0.2);
+      border-radius:20px;padding:40px;text-align:center;
+      position:relative;overflow:hidden;
+    }
+    .speak-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--neon-orange),var(--neon-yellow));}
+    .speak-emoji{font-size:6rem;display:block;margin-bottom:16px;animation:float 3s ease-in-out infinite;}
+    .speak-word{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;
+      color:var(--star-white);margin-bottom:6px;}
+    .speak-sentence-frame{
+      font-family:'Space Mono',monospace;font-size:1rem;
+      color:var(--neon-yellow);
+      background:rgba(255,229,0,0.06);border:1px solid rgba(255,229,0,0.2);
+      border-radius:10px;padding:14px 20px;display:inline-block;margin:20px 0;
+      letter-spacing:.05em;
+    }
+    .speak-sentence-frame .blank{color:var(--neon-orange);text-decoration:underline dotted;}
+    .speak-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px;}
+    .sp-btn{
+      font-family:'Orbitron',monospace;font-size:.72rem;font-weight:700;
+      padding:12px 22px;border-radius:8px;border:none;cursor:pointer;
+      letter-spacing:.05em;text-transform:uppercase;transition:all .2s;
+    }
+    .sp-listen{background:linear-gradient(135deg,var(--neon-orange),var(--neon-yellow));color:var(--space-dark);}
+    .sp-yes{background:linear-gradient(135deg,var(--neon-green),rgba(0,212,255,.8));color:var(--space-dark);}
+    .sp-no{background:linear-gradient(135deg,rgba(255,60,160,.8),rgba(255,107,0,.8));color:#fff;}
+    .sp-next{background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));color:#fff;}
+    .sp-btn:hover{transform:translateY(-2px);filter:brightness(1.15);}
+    .speak-feedback{
+      font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;
+      min-height:1.6rem;margin-top:16px;text-align:center;
+    }
+    .speak-feedback.yes{color:var(--neon-green);}
+    .speak-feedback.no{color:var(--neon-orange);}
+    .speak-score-row{display:flex;gap:20px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+    .sp-score-pill{
+      font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700;
+      padding:8px 18px;border-radius:50px;
+    }
+    .sp-cat-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:24px;}
+    .sp-cat-btn{
+      font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;
+      padding:7px 14px;border-radius:6px;border:1px solid rgba(255,107,0,0.3);
+      color:var(--neon-orange);background:rgba(255,107,0,0.06);
+      cursor:pointer;transition:all .2s;letter-spacing:.05em;text-transform:uppercase;
+    }
+    .sp-cat-btn:hover,.sp-cat-btn.active{background:rgba(255,107,0,0.2);border-color:var(--neon-orange);}
+
+    /* Zone 4: drawing */
+    .draw-arena{text-align:center;}
+    .draw-prompt{
+      font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;
+      color:var(--neon-purple);margin-bottom:8px;
+    }
+    .draw-sentence{
+      font-family:'Space Mono',monospace;font-size:.85rem;
+      color:var(--text-body);margin-bottom:20px;
+    }
+    #drawCanvas{
+      border-radius:16px;border:1px solid rgba(180,79,255,0.3);
+      background:#05091A;cursor:crosshair;max-width:100%;
+      box-shadow:0 0 40px rgba(180,79,255,0.15),inset 0 0 40px rgba(0,0,0,.5);
+      touch-action:none;
+    }
+    .draw-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+    .draw-color{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.1);cursor:pointer;transition:transform .2s;}
+    .draw-color:hover{transform:scale(1.2);}
+    .draw-color.active{border-color:#fff;transform:scale(1.15);}
+    .draw-tool-btn{
+      font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;
+      padding:8px 16px;border-radius:6px;border:1px solid rgba(180,79,255,0.3);
+      color:var(--neon-purple);background:rgba(180,79,255,0.06);cursor:pointer;transition:all .2s;
+    }
+    .draw-tool-btn:hover{background:rgba(180,79,255,0.15);}
+    .draw-words{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;}
+    .draw-word-btn{
+      font-family:'Orbitron',monospace;font-size:.7rem;font-weight:700;
+      padding:8px 14px;border-radius:8px;border:1px solid rgba(180,79,255,0.25);
+      color:var(--text-body);background:rgba(180,79,255,0.06);cursor:pointer;transition:all .2s;
+      letter-spacing:.05em;
+    }
+    .draw-word-btn:hover,.draw-word-btn.active{color:var(--neon-purple);border-color:var(--neon-purple);background:rgba(180,79,255,0.15);}
+
+    /* ══ QUIZ ══ */
+    #quiz-section{background:linear-gradient(180deg,transparent,rgba(255,229,0,0.03),transparent);}
+    .quiz-wrap{max-width:700px;margin:0 auto;}
+    .quiz-card{
+      background:var(--card-bg);border:1px solid rgba(255,229,0,0.15);
+      border-radius:20px;padding:40px;
+      backdrop-filter:blur(20px);
+    }
+    .quiz-progress{display:flex;gap:8px;margin-bottom:24px;}
+    .quiz-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.1);transition:background .3s;}
+    .quiz-dot.done{background:var(--neon-yellow);}
+    .quiz-dot.current{background:var(--neon-blue);box-shadow:var(--glow-blue);}
+    .quiz-q{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:700;color:var(--star-white);margin-bottom:8px;}
+    .quiz-hint{font-size:.85rem;color:var(--text-body);margin-bottom:28px;}
+    .quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .quiz-opt{
+      background:rgba(255,229,0,0.04);border:1px solid rgba(255,229,0,0.15);
+      border-radius:12px;padding:18px 20px;cursor:pointer;
+      font-size:.95rem;color:var(--text-body);text-align:center;
+      transition:all .2s;font-family:'Exo 2',sans-serif;font-weight:600;
+    }
+    .quiz-opt:hover{border-color:rgba(255,229,0,0.4);background:rgba(255,229,0,0.08);color:var(--star-white);}
+    .quiz-opt.correct{border-color:var(--neon-green);background:rgba(0,255,136,0.12);color:var(--neon-green);pointer-events:none;}
+    .quiz-opt.wrong{border-color:var(--neon-pink);background:rgba(255,60,160,0.1);color:var(--neon-pink);pointer-events:none;animation:shake .4s;}
+    .quiz-feedback{text-align:center;font-family:'Orbitron',monospace;font-size:1rem;margin-top:16px;min-height:1.5rem;}
+    .quiz-feedback.ok{color:var(--neon-green);}
+    .quiz-feedback.bad{color:var(--neon-pink);}
+    .quiz-nav{display:flex;justify-content:center;margin-top:24px;}
+    .quiz-score-display{
+      text-align:center;padding:40px;
+    }
+    .quiz-score-display .big-num{font-family:'Orbitron',monospace;font-size:4rem;font-weight:900;color:var(--neon-yellow);line-height:1;}
+    .quiz-score-display p{color:var(--text-body);margin-top:8px;font-size:1rem;}
+
+    /* ══ VOCABULARY REFERENCE ══ */
+    #vocab{background:linear-gradient(180deg,transparent,rgba(0,212,255,0.02),transparent);}
+    .vocab-tabs{display:flex;gap:8px;margin-bottom:32px;flex-wrap:wrap;}
+    .vocab-tab{
+      font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;
+      padding:8px 16px;border-radius:6px;border:1px solid rgba(0,212,255,0.2);
+      color:var(--text-body);background:transparent;cursor:pointer;
+      transition:all .2s;letter-spacing:.05em;text-transform:uppercase;
+    }
+    .vocab-tab.active,.vocab-tab:hover{color:var(--neon-blue);border-color:var(--neon-blue);background:rgba(0,212,255,0.08);}
+    .vocab-panel{display:none;}
+    .vocab-panel.active{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;animation:fadeUp .3s ease;}
+    .vocab-card{
+      background:var(--card-bg);border:1px solid var(--card-border);
+      border-radius:12px;padding:20px 14px;text-align:center;cursor:pointer;
+      transition:all .25s;
+    }
+    .vocab-card:hover{border-color:rgba(0,212,255,0.4);transform:translateY(-4px);box-shadow:var(--glow-blue);}
+    .vocab-card.played{border-color:rgba(0,255,136,0.3);}
+    .vocab-emoji{font-size:2.5rem;display:block;margin-bottom:8px;}
+    .vocab-word{font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;color:var(--star-white);letter-spacing:.04em;}
+    .vocab-sent{font-size:.68rem;color:var(--text-body);margin-top:4px;line-height:1.4;}
+    .vocab-color-swatch{width:60px;height:60px;border-radius:10px;margin:0 auto 10px;border:2px solid rgba(255,255,255,.1);}
+
+    /* ══ TEACHER SECTION ══ */
+    #teacher{background:linear-gradient(180deg,transparent,rgba(180,79,255,0.04),transparent);}
+    .teacher-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+    .teacher-card{
+      background:var(--card-bg);border:1px solid var(--card-border);
+      border-radius:14px;padding:28px 24px;
+      backdrop-filter:blur(16px);transition:transform .25s,border-color .25s;
+    }
+    .teacher-card:hover{transform:translateY(-4px);border-color:rgba(180,79,255,0.35);}
+    .teacher-card-icon{font-size:2rem;margin-bottom:14px;display:block;}
+    .teacher-card h3{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:700;color:var(--star-white);margin-bottom:10px;letter-spacing:.05em;}
+    .teacher-card p{font-size:.85rem;line-height:1.7;color:var(--text-body);}
+    .teacher-card ul{list-style:none;margin-top:10px;}
+    .teacher-card ul li{font-size:.82rem;color:var(--text-body);padding:4px 0;display:flex;gap:8px;}
+    .teacher-card ul li::before{content:'◈';color:var(--neon-purple);font-size:.6rem;margin-top:3px;}
+
+    /* ══ GLOBAL SCORE BAR ══ */
+    .score-bar{
+      position:fixed;bottom:0;left:0;right:0;z-index:999;
+      background:rgba(3,6,15,0.92);backdrop-filter:blur(20px);
+      border-top:1px solid rgba(0,212,255,0.1);
+      display:flex;align-items:center;justify-content:center;gap:32px;
+      padding:10px 24px;
+    }
+    .score-item{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:.75rem;}
+    .score-item span:first-child{color:var(--text-body);text-transform:uppercase;letter-spacing:.1em;}
+    .score-val{font-weight:700;font-size:.9rem;}
+    .score-val.blue{color:var(--neon-blue);}
+    .score-val.green{color:var(--neon-green);}
+    .score-val.yellow{color:var(--neon-yellow);}
+
+    /* ══ FOOTER ══ */
+    footer{
+      position:relative;z-index:1;
+      background:rgba(0,0,0,.6);
+      border-top:1px solid rgba(0,212,255,0.1);
+      padding:60px 40px 100px;
+    }
+    .footer-inner{max-width:1200px;margin:0 auto;}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:60px;margin-bottom:40px;}
+    .footer-brand{}
+    .footer-logo{
+      font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;
+      color:var(--neon-blue);text-shadow:var(--glow-blue);
+      display:flex;align-items:center;gap:10px;margin-bottom:16px;
+    }
+    .footer-brand p{font-size:.9rem;line-height:1.75;color:var(--text-body);max-width:340px;}
+    .footer-col h4{
+      font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;
+      color:var(--neon-blue);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;
+    }
+    .footer-col ul{list-style:none;}
+    .footer-col ul li{font-size:.85rem;color:var(--text-body);padding:5px 0;line-height:1.5;}
+    .footer-divider{border:none;border-top:1px solid rgba(0,212,255,0.08);margin-bottom:32px;}
+    .footer-bottom{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+    .footer-credits{font-size:.82rem;color:var(--text-body);line-height:1.8;}
+    .footer-credits strong{color:var(--neon-blue);}
+    .footer-info-table{
+      background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.12);
+      border-radius:10px;padding:18px 22px;
+    }
+    .footer-info-table table{border-collapse:collapse;width:100%;}
+    .footer-info-table td{padding:5px 12px;font-size:.8rem;color:var(--text-body);}
+    .footer-info-table td:first-child{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--neon-blue);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
+
+    /* ══ STAR POP ══ */
+    .star-pop{position:fixed;pointer-events:none;font-size:1.6rem;z-index:9998;animation:starPop 1s ease-out forwards;}
+    @keyframes starPop{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-90px) scale(1.6)}}
+
+    /* ══ TOAST ══ */
+    .toast{
+      position:fixed;top:90px;right:24px;z-index:9997;
+      background:rgba(3,6,15,0.95);border:1px solid rgba(0,212,255,0.3);
+      border-radius:10px;padding:14px 22px;
+      font-family:'Space Mono',monospace;font-size:.78rem;color:var(--neon-green);
+      box-shadow:var(--glow-blue);animation:slideIn .3s ease, fadeOut .4s 2.2s ease forwards;
+      max-width:300px;
+    }
+    @keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes fadeOut{to{opacity:0;transform:translateX(20px)}}
+
+    /* ══ RESPONSIVE ══ */
+    @media(max-width:900px){
+      .about-grid{grid-template-columns:1fr;}
+      .zones-grid{grid-template-columns:1fr;}
+      .teacher-grid{grid-template-columns:1fr;}
+      .footer-grid{grid-template-columns:1fr;}
+      .footer-bottom{flex-direction:column;}
+      .match-grid{grid-template-columns:1fr;}
+      .quiz-opts{grid-template-columns:1fr;}
+      nav{padding:0 20px;}
+    }
+    @media(max-width:640px){
+      .section{padding:70px 20px;}
+      .nav-links{display:none;}
+      .nav-links.open{display:flex;flex-direction:column;position:fixed;
+        top:70px;left:0;right:0;background:rgba(3,6,15,0.98);padding:20px;gap:4px;
+        border-bottom:1px solid rgba(0,212,255,0.1);}
+      .nav-burger{display:flex;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- STARFIELD -->
+<canvas id="starfield"></canvas>
+<div class="shoot"></div>
+<div class="shoot"></div>
+<div class="shoot"></div>
+
+<!-- SCORE BAR -->
+<div class="score-bar">
+  <div class="score-item"><span>Stars</span><span class="score-val blue" id="g-stars">0</span></div>
+  <div class="score-item"><span>Streak</span><span class="score-val green" id="g-streak">0</span>🔥</div>
+  <div class="score-item"><span>Words</span><span class="score-val yellow" id="g-words">0</span></div>
+  <div class="score-item"><span>Quiz</span><span class="score-val blue" id="g-quiz">0/0</span></div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#home" class="nav-logo"><span>🚀</span> Speak &amp; Click Lab</a>
+  <div class="nav-links" id="nav-links">
+    <a href="#home"    class="nav-link active">Home</a>
+    <a href="#about"   class="nav-link">About</a>
+    <a href="#zones"   class="nav-link">Zones</a>
+    <a href="#activities" class="nav-link">Activities</a>
+    <a href="#quiz-section" class="nav-link">Quiz</a>
+    <a href="#vocab"   class="nav-link">Vocabulary</a>
+    <a href="#teacher" class="nav-link">For Teachers</a>
+  </div>
+  <div class="nav-burger" id="burger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="home">
+  <span class="hero-badge">🌌 Virtual Speaking Experience · Pre-A1 English</span>
+  <span class="hero-rocket">🚀</span>
+  <h1 class="hero-title">Speak &amp; Click Lab</h1>
+  <p class="hero-sub">Virtual Speaking Experience</p>
+  <p class="hero-desc">A space-themed interactive English learning platform designed to build speaking confidence in beginner learners. Explore 4 learning zones, practice vocabulary, and describe your universe in English!</p>
+  <div class="hero-btns">
+    <a href="#activities" class="btn-primary">🎮 Start Learning</a>
+    <a href="#zones" class="btn-secondary">📡 Explore Zones</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">4</div><div class="stat-label">Learning Zones</div></div>
+    <div class="stat"><div class="stat-num">40+</div><div class="stat-label">Vocabulary Words</div></div>
+    <div class="stat"><div class="stat-num">PPP</div><div class="stat-label">Methodology</div></div>
+    <div class="stat"><div class="stat-num">Pre-A1</div><div class="stat-label">CEFR Level</div></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div>
+        <p class="section-eyebrow">About This Resource</p>
+        <h2 class="section-title">What is <span>Speak &amp; Click Lab?</span></h2>
+        <div class="divider"></div>
+        <p style="font-size:.97rem;line-height:1.8;color:var(--text-body);margin-bottom:24px;">
+          Speak &amp; Click Lab is a gamified digital educational resource designed to solve a critical classroom challenge: students show limited speaking opportunities, low confidence when expressing ideas orally, and a tendency to participate without producing spoken language in English.
+        </p>
+        <p style="font-size:.97rem;line-height:1.8;color:var(--text-body);margin-bottom:32px;">
+          Through a structured PPP (Presentation, Practice, Production) approach combined with guided speaking techniques, students progress from visual recognition to independent oral production — building confidence with every interaction.
+        </p>
+        <ul class="about-list">
+          <li>Students identify and describe colors and classroom objects using short oral sentences</li>
+          <li>Interactive challenges move learners from recognition to speaking gradually</li>
+          <li>Immediate feedback reinforces correct answers and encourages participation</li>
+          <li>Space theme creates an immersive, motivating environment for exploration</li>
+        </ul>
+        <div class="about-pills" style="margin-top:28px;">
+          <span class="pill pill-blue">🎮 Gamified</span>
+          <span class="pill pill-purple">🗣️ Speaking Focus</span>
+          <span class="pill pill-green">📱 Interactive</span>
+          <span class="pill pill-yellow">🌍 PPP Method</span>
+        </div>
+      </div>
+      <div class="about-visual">
+        <div style="position:relative;width:300px;height:300px;margin:0 auto;">
+          <div class="planet">
+            <div class="planet-ring"></div>
+            <div class="orbit-dot"></div>
+            <div class="orbit-dot"></div>
+          </div>
+        </div>
+        <div style="margin-top:40px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:24px;">
+          <p class="section-eyebrow" style="margin-bottom:12px;">Learning Objective</p>
+          <p style="font-size:.9rem;line-height:1.75;color:var(--text-body);">Students will be able to <strong style="color:var(--star-white);">identify and describe colors and classroom objects</strong> using short oral sentences, showing increased confidence in speaking.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ZONES -->
+<section class="section" id="zones">
+  <div class="section-inner">
+    <p class="section-eyebrow">Learning Structure</p>
+    <h2 class="section-title">The 4 <span>Mission Zones</span></h2>
+    <div class="divider"></div>
+    <p class="section-desc">Each zone follows the PPP methodology — from visual comprehension to guided practice to independent speaking production.</p>
+    <div class="zones-grid">
+
+      <div class="zone-card" style="--zone-color:var(--neon-blue);--zone-border:rgba(0,212,255,0.4);--zone-shadow:var(--glow-blue);--zone-glow:rgba(0,212,255,0.06);">
+        <div class="zone-num">01</div>
+        <span class="zone-icon">🔭</span>
+        <span class="zone-tag">Zone 1 · Presentation</span>
+        <h3 class="zone-title">EXPLORE — Visual Input</h3>
+        <p class="zone-desc">Students observe and recognize vocabulary through visual stimuli — no speaking pressure here. Build recognition before production.</p>
+        <ul class="zone-activities">
+          <li>Watch short videos about colors and objects</li>
+          <li>Observe images and digital flashcards</li>
+          <li>Click and select correct colors</li>
+          <li>Match images to vocabulary</li>
+        </ul>
+        <div class="zone-goal"><strong>Goal:</strong> Comprehension without speaking pressure</div>
+      </div>
+
+      <div class="zone-card" style="--zone-color:var(--neon-purple);--zone-border:rgba(180,79,255,0.4);--zone-shadow:var(--glow-purple);--zone-glow:rgba(180,79,255,0.06);">
+        <div class="zone-num">02</div>
+        <span class="zone-icon">🛸</span>
+        <span class="zone-tag">Zone 2 · Practice</span>
+        <h3 class="zone-title">INTERACT — Guided Practice</h3>
+        <p class="zone-desc">Students interact with digital tools through structured activities. Repetition builds familiarity and reduces anxiety.</p>
+        <ul class="zone-activities">
+          <li>Matching and memory games</li>
+          <li>Drag-and-drop exercises</li>
+          <li>Sorting objects by color</li>
+          <li>True/false identification tasks</li>
+        </ul>
+        <div class="zone-goal"><strong>Goal:</strong> Guided participation + repetition</div>
+      </div>
+
+      <div class="zone-card" style="--zone-color:var(--neon-orange);--zone-border:rgba(255,107,0,0.4);--zone-shadow:0 0 20px rgba(255,107,0,0.3);--zone-glow:rgba(255,107,0,0.06);">
+        <div class="zone-num">03</div>
+        <span class="zone-icon">🎤</span>
+        <span class="zone-tag">Zone 3 · Production</span>
+        <h3 class="zone-title">EXPRESS — Guided Speaking</h3>
+        <p class="zone-desc">Students speak with structured support using sentence frames. Confidence grows through repetition and positive reinforcement.</p>
+        <ul class="zone-activities">
+          <li>Repeat after audio model</li>
+          <li>Use sentence frames: "It is red"</li>
+          <li>Complete "The ___ is ___" structures</li>
+          <li>Respond to "What color is it?"</li>
+        </ul>
+        <div class="zone-goal"><strong>Goal:</strong> Supported speaking production</div>
+      </div>
+
+      <div class="zone-card" style="--zone-color:var(--neon-green);--zone-border:rgba(0,255,136,0.4);--zone-shadow:var(--glow-green);--zone-glow:rgba(0,255,136,0.06);">
+        <div class="zone-num">04</div>
+        <span class="zone-icon">🌠</span>
+        <span class="zone-tag">Zone 4 · Output</span>
+        <h3 class="zone-title">REFLECT — Independent Output</h3>
+        <p class="zone-desc">Students describe what they see or create, drawing objects and explaining them orally. Maximum speaking confidence!</p>
+        <ul class="zone-activities">
+          <li>Draw space objects using the digital canvas</li>
+          <li>Describe drawings orally using learned vocabulary</li>
+          <li>Answer simple questions independently</li>
+          <li>Create and present their space scene</li>
+        </ul>
+        <div class="zone-goal"><strong>Goal:</strong> Independent speaking + confidence</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ACTIVITIES -->
+<section class="section" id="activities">
+  <div class="section-inner">
+    <p class="section-eyebrow">Interactive Learning</p>
+    <h2 class="section-title">Mission <span>Activities</span></h2>
+    <div class="divider"></div>
+    <div class="act-tabs">
+      <button class="act-tab active" onclick="switchAct('zone1',this)">🔭 Zone 1 · Flashcards</button>
+      <button class="act-tab" onclick="switchAct('zone2',this)">🛸 Zone 2 · Match</button>
+      <button class="act-tab" onclick="switchAct('zone3',this)">🎤 Zone 3 · Speak</button>
+      <button class="act-tab" onclick="switchAct('zone4',this)">🌠 Zone 4 · Draw</button>
+    </div>
+
+    <!-- ZONE 1: FLASHCARDS -->
+    <div class="act-panel active" id="act-zone1">
+      <div class="flashcard-section">
+        <p style="font-size:.92rem;color:var(--text-body);text-align:center;margin-bottom:8px;">👆 Tap a card to flip it and hear the word! Explore all categories.</p>
+        <div class="fc-controls" id="fc-cat-controls"></div>
+        <div class="fc-row" id="fc-grid"></div>
+        <p style="font-size:.78rem;color:var(--text-body);opacity:.6;">Click any card · Hear the English word · Say it out loud!</p>
+      </div>
+    </div>
+
+    <!-- ZONE 2: MATCHING -->
+    <div class="act-panel" id="act-zone2">
+      <p style="font-size:.92rem;color:var(--text-body);margin-bottom:20px;">🛸 <strong style="color:var(--star-white);">Matching Mission:</strong> Click an emoji on the left, then click the matching word on the right!</p>
+      <div class="match-grid">
+        <div class="match-col"><h4>🌌 Space Objects</h4><div id="match-left"></div></div>
+        <div class="match-col"><h4>📡 English Words</h4><div id="match-right"></div></div>
+      </div>
+      <div class="match-score" id="match-score"></div>
+      <div style="text-align:center;margin-top:20px;">
+        <button onclick="buildMatch()" class="btn-primary" style="font-size:.75rem;padding:12px 24px;">🔄 New Round</button>
+      </div>
+    </div>
+
+    <!-- ZONE 3: SPEAKING -->
+    <div class="act-panel" id="act-zone3">
+      <div class="speak-arena">
+        <div class="sp-cat-btns" id="sp-cat-btns"></div>
+        <div class="speak-card">
+          <span class="speak-emoji" id="sp-emoji">🔴</span>
+          <div class="speak-word" id="sp-word">Red</div>
+          <div class="speak-sentence-frame" id="sp-frame">It is <span class="blank">Red</span></div>
+          <div class="speak-btns">
+            <button class="sp-btn sp-listen" onclick="spListen()">🔊 Listen</button>
+            <button class="sp-btn sp-yes"    onclick="spCheck(true)">✅ I said it!</button>
+            <button class="sp-btn sp-no"     onclick="spCheck(false)">❌ Try again</button>
+            <button class="sp-btn sp-next"   onclick="spNext()">▶ Next</button>
+          </div>
+        </div>
+        <div class="speak-feedback" id="sp-fb"></div>
+        <div class="speak-score-row">
+          <span class="sp-score-pill" style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:var(--neon-green);">✅ Got it: <span id="sp-correct">0</span></span>
+          <span class="sp-score-pill" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--neon-blue);">📊 Practiced: <span id="sp-total">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 4: DRAW -->
+    <div class="act-panel" id="act-zone4">
+      <div class="draw-arena">
+        <div class="draw-prompt" id="draw-prompt">Draw this: 🚀 Rocket</div>
+        <div class="draw-sentence">After drawing, say: <strong style="color:var(--neon-purple);" id="draw-sent">"This is a rocket. It is red."</strong></div>
+        <div class="draw-words" id="draw-words"></div>
+        <canvas id="drawCanvas" width="680" height="340"></canvas>
+        <div class="draw-controls">
+          <button class="draw-color active" data-color="#00D4FF" style="background:#00D4FF;" title="Blue"></button>
+          <button class="draw-color" data-color="#FF3CA0" style="background:#FF3CA0;" title="Pink"></button>
+          <button class="draw-color" data-color="#FFE500" style="background:#FFE500;" title="Yellow"></button>
+          <button class="draw-color" data-color="#00FF88" style="background:#00FF88;" title="Green"></button>
+          <button class="draw-color" data-color="#FF6B00" style="background:#FF6B00;" title="Orange"></button>
+          <button class="draw-color" data-color="#B44FFF" style="background:#B44FFF;" title="Purple"></button>
+          <button class="draw-color" data-color="#FFFFFF" style="background:#FFFFFF;" title="White"></button>
+          <button class="draw-tool-btn" onclick="clearDraw()">🧹 Clear</button>
+          <button class="draw-tool-btn" onclick="nextDrawPrompt()">🎲 New Prompt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="section" id="quiz-section">
+  <div class="section-inner">
+    <p class="section-eyebrow">Mission Challenge</p>
+    <h2 class="section-title">Space <span>Quiz</span></h2>
+    <div class="divider"></div>
+    <div class="quiz-wrap">
+      <div class="quiz-card" id="quiz-card">
+        <div class="quiz-progress" id="quiz-dots"></div>
+        <div id="quiz-body"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VOCABULARY -->
+<section class="section" id="vocab">
+  <div class="section-inner">
+    <p class="section-eyebrow">Reference Guide</p>
+    <h2 class="section-title">Vocabulary <span>Galaxy</span></h2>
+    <div class="divider"></div>
+    <p class="section-desc">Click any word to hear it spoken in English. Practice the sentence structure for each!</p>
+    <div class="vocab-tabs" id="vocab-tabs"></div>
+    <div id="vocab-panels"></div>
+  </div>
+</section>
+
+<!-- TEACHER -->
+<section class="section" id="teacher">
+  <div class="section-inner">
+    <p class="section-eyebrow">Pedagogical Notes</p>
+    <h2 class="section-title">For <span>Teachers</span></h2>
+    <div class="divider"></div>
+    <div class="teacher-grid">
+      <div class="teacher-card">
+        <span class="teacher-card-icon">🎯</span>
+        <h3>Learning Objective</h3>
+        <p>Students will be able to identify and describe colors and classroom objects using short oral sentences, showing increased confidence in speaking.</p>
+        <ul>
+          <li>Recognize basic colors: red, blue, yellow, green</li>
+          <li>Name classroom objects: pencil, book, chair, bag</li>
+          <li>Produce: "It is ___" and "The ___ is ___"</li>
+        </ul>
+      </div>
+      <div class="teacher-card">
+        <span class="teacher-card-icon">📚</span>
+        <h3>PPP Methodology</h3>
+        <p>This resource follows the Presentation → Practice → Production approach combined with guided speaking techniques.</p>
+        <ul>
+          <li>Zone 1: Presentation (visual input, flashcards)</li>
+          <li>Zone 2: Practice (matching, games, repetition)</li>
+          <li>Zone 3: Production (guided speaking with frames)</li>
+          <li>Zone 4: Output (independent description)</li>
+        </ul>
+      </div>
+      <div class="teacher-card">
+        <span class="teacher-card-icon">💬</span>
+        <h3>Feedback Strategy</h3>
+        <p>Positive reinforcement is prioritized over direct correction. Interactive platforms offer immediate digital feedback.</p>
+        <ul>
+          <li>Repeat and model rather than correct</li>
+          <li>Immediate right/wrong visual feedback</li>
+          <li>Stars and streaks motivate participation</li>
+          <li>Zone 3 self-assessment builds agency</li>
+        </ul>
+      </div>
+      <div class="teacher-card">
+        <span class="teacher-card-icon">👥</span>
+        <h3>Target Audience</h3>
+        <p>Designed for beginner English learners at the Pre-A1 CEFR level in a virtual or hybrid classroom environment.</p>
+        <ul>
+          <li>Ages 6–12 (primary/elementary)</li>
+          <li>Pre-A1 → A1 CEFR level</li>
+          <li>Virtual and hybrid classrooms</li>
+          <li>Low speaking confidence learners</li>
+        </ul>
+      </div>
+      <div class="teacher-card">
+        <span class="teacher-card-icon">🎲</span>
+        <h3>Gamified Elements</h3>
+        <p>The resource integrates gamification to maintain engagement and reduce speaking anxiety.</p>
+        <ul>
+          <li>Star points for correct answers</li>
+          <li>Streak counter for motivation</li>
+          <li>Progress tracking across activities</li>
+          <li>Quiz challenges with scoring</li>
+        </ul>
+      </div>
+      <div class="teacher-card">
+        <span class="teacher-card-icon">🛠️</span>
+        <h3>Sentence Structures</h3>
+        <p>Two core structures are practiced throughout all zones to build oral production gradually.</p>
+        <ul>
+          <li>"It is ___." (colors)</li>
+          <li>"The ___ is ___." (objects + colors)</li>
+          <li>"What color is it?" (Q&amp;A)</li>
+          <li>"What is this?" (identification)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo"><span>🚀</span> Speak &amp; Click Lab</div>
+        <p>A gamified virtual speaking experience for beginner English learners. Built with a space theme to inspire curiosity, exploration, and oral confidence in the classroom.</p>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          <span class="pill pill-blue">Pre-A1 English</span>
+          <span class="pill pill-purple">PPP Method</span>
+          <span class="pill pill-green">LABINNOVA</span>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Mission Zones</h4>
+        <ul>
+          <li>🔭 Zone 1 · EXPLORE</li>
+          <li>🛸 Zone 2 · INTERACT</li>
+          <li>🎤 Zone 3 · EXPRESS</li>
+          <li>🌠 Zone 4 · REFLECT</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Content Areas</h4>
+        <ul>
+          <li>🎨 Basic Colors</li>
+          <li>🧸 Classroom Objects</li>
+          <li>🗣️ Speaking Frames</li>
+          <li>🎮 Interactive Games</li>
+          <li>✏️ Drawing Activities</li>
+        </ul>
+      </div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="footer-bottom">
+      <div class="footer-credits">
+        <p><strong>Speak &amp; Click Lab: Virtual Speaking Experience</strong></p>
+        <p>Technology in Foreign Language Teaching · LABINNOVA · UNAD</p>
+        <p style="margin-top:8px;font-size:.75rem;opacity:.6;">© 2025 — Educational resource for non-commercial academic use</p>
+      </div>
+      <div class="footer-info-table">
+        <table>
+          <tr><td>Student</td><td><strong style="color:var(--star-white);">Richard Jesús Riaño Peña</strong></td></tr>
+          <tr><td>Degree</td><td><strong style="color:var(--star-white);">LILEI</strong></td></tr>
+          <tr><td>Course</td><td>Technology in Foreign Language Teaching</td></tr>
+          <tr><td>Teacher</td><td>Valeria Maria Eraso Ibarra</td></tr>
+          <tr><td>Level</td><td>Pre-A1 · CEFR</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ══════════ STARFIELD ══════════
+(function(){
+  const c=document.getElementById('starfield');
+  const ctx=c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  const stars=Array.from({length:200},()=>({
+    x:Math.random(),y:Math.random(),
+    r:Math.random()*1.8+0.2,
+    a:Math.random(),da:(Math.random()-.5)*.008,
+  }));
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.a=Math.max(0.1,Math.min(1,s.a+s.da));
+      if(s.a<=0.1||s.a>=1) s.da*=-1;
+      ctx.beginPath();ctx.arc(s.x*c.width,s.y*c.height,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ══════════ DATA ══════════
+const COLORS=[
+  {e:'🔴',word:'Red',    sent:'It is red.',        type:'color'},
+  {e:'🔵',word:'Blue',   sent:'It is blue.',       type:'color'},
+  {e:'🟡',word:'Yellow', sent:'It is yellow.',     type:'color'},
+  {e:'🟢',word:'Green',  sent:'It is green.',      type:'color'},
+  {e:'🟠',word:'Orange', sent:'It is orange.',     type:'color'},
+  {e:'🟣',word:'Purple', sent:'It is purple.',     type:'color'},
+  {e:'⚫',word:'Black',  sent:'It is black.',      type:'color'},
+  {e:'⚪',word:'White',  sent:'It is white.',      type:'color'},
+];
+const OBJECTS=[
+  {e:'✏️',word:'Pencil', sent:'The pencil is yellow.',   type:'object'},
+  {e:'📚',word:'Book',   sent:'The book is blue.',       type:'object'},
+  {e:'🪑',word:'Chair',  sent:'The chair is brown.',     type:'object'},
+  {e:'🎒',word:'Bag',    sent:'The bag is red.',         type:'object'},
+  {e:'📏',word:'Ruler',  sent:'The ruler is green.',     type:'object'},
+  {e:'🖍️',word:'Crayon', sent:'The crayon is orange.',  type:'object'},
+  {e:'📓',word:'Notebook',sent:'The notebook is purple.',type:'object'},
+  {e:'🖊️',word:'Pen',    sent:'The pen is black.',      type:'object'},
+];
+const SPACE=[
+  {e:'🚀',word:'Rocket',  sent:'The rocket is red.',     type:'space'},
+  {e:'🌕',word:'Moon',    sent:'The moon is white.',     type:'space'},
+  {e:'⭐',word:'Star',    sent:'The star is yellow.',    type:'space'},
+  {e:'🪐',word:'Planet',  sent:'The planet is blue.',   type:'space'},
+  {e:'☀️',word:'Sun',     sent:'The sun is orange.',    type:'space'},
+  {e:'🌌',word:'Galaxy',  sent:'The galaxy is purple.', type:'space'},
+  {e:'🛸',word:'UFO',     sent:'The UFO is green.',     type:'space'},
+  {e:'🌠',word:'Shooting Star',sent:'It is a shooting star.',type:'space'},
+];
+const ALL_VOCAB={Colors:COLORS,Objects:OBJECTS,'Space Words':SPACE};
+
+// ══════════ SPEECH ══════════
+let _voice=null;
+function loadVoice(){
+  const vs=window.speechSynthesis.getVoices(); if(!vs.length) return;
+  const wish=['Samantha','Karen','Google US English','Zira','Microsoft Zira','Moira','Victoria'];
+  for(const n of wish){const v=vs.find(v=>v.name.includes(n));if(v){_voice=v;return;}}
+  const enUS=vs.find(v=>v.lang==='en-US'); if(enUS){_voice=enUS;return;}
+  const en=vs.find(v=>v.lang.startsWith('en')); if(en) _voice=en;
+}
+window.speechSynthesis.onvoiceschanged=loadVoice; loadVoice();
+function speak(text){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel(); if(!_voice) loadVoice();
+  const clean=text.replace(/[^\w\s'!?.]/g,'').trim(); if(!clean) return;
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang='en-US'; u.rate=0.82; u.pitch=1.3; u.volume=1;
+  if(_voice) u.voice=_voice;
+  window.speechSynthesis.speak(u);
+}
+
+// ══════════ SCORE ══════════
+let gStars=0,gStreak=0,gWords=new Set(),gQuiz={c:0,t:0};
+function addStar(n=1){gStars+=n;gStreak++;upScore();}
+function resetStreak(){gStreak=0;upScore();}
+function learnWord(w){gWords.add(w);upScore();}
+function upScore(){
+  document.getElementById('g-stars').textContent=gStars;
+  document.getElementById('g-streak').textContent=gStreak;
+  document.getElementById('g-words').textContent=gWords.size;
+  document.getElementById('g-quiz').textContent=gQuiz.c+'/'+gQuiz.t;
+}
+function spawnStars(el){
+  const r=el.getBoundingClientRect();
+  const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  ['⭐','🌟','✨','💫','🚀'].forEach((s,i)=>{
+    const sp=document.createElement('span');
+    sp.className='star-pop'; sp.textContent=s;
+    sp.style.left=(cx+(i-2)*26)+'px'; sp.style.top=cy+'px';
+    document.body.appendChild(sp); setTimeout(()=>sp.remove(),1100);
+  });
+}
+function showToast(msg){
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2700);
+}
+
+// ══════════ NAV ══════════
+function toggleMenu(){
+  document.getElementById('nav-links').classList.toggle('open');
+}
+window.addEventListener('scroll',()=>{
+  const links=document.querySelectorAll('.nav-link');
+  const sections=document.querySelectorAll('section[id],div[id="quiz-section"],.section[id]');
+  let cur='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-120) cur=s.id;});
+  links.forEach(l=>{l.classList.toggle('active',l.getAttribute('href')==='#'+cur);});
+});
+
+// ══════════ FLASHCARDS (Zone 1) ══════════
+let fcCat='Colors';
+function buildFCControls(){
+  const c=document.getElementById('fc-cat-controls');
+  const colors={Colors:'var(--neon-blue)',Objects:'var(--neon-purple)','Space Words':'var(--neon-green)'};
+  Object.keys(ALL_VOCAB).forEach(cat=>{
+    const btn=document.createElement('button');
+    btn.className='fc-cat-btn'+(cat===fcCat?' active':'');
+    btn.textContent=cat;
+    btn.style.cssText=`color:${colors[cat]};border-color:${colors[cat]}33;background:${colors[cat]}11;`;
+    btn.onclick=()=>{
+      fcCat=cat;
+      document.querySelectorAll('.fc-cat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); buildFCGrid();
+    };
+    c.appendChild(btn);
+  });
+}
+function buildFCGrid(){
+  const g=document.getElementById('fc-grid'); g.innerHTML='';
+  ALL_VOCAB[fcCat].forEach(item=>{
+    const fc=document.createElement('div'); fc.className='fc';
+    fc.innerHTML=`
+      <div class="fc-inner">
+        <div class="fc-f">
+          <span class="fc-emoji">${item.e}</span>
+          <span class="fc-hint">Tap to flip!</span>
+        </div>
+        <div class="fc-b">
+          <div class="fc-back-word">${item.word}</div>
+          <div class="fc-back-sub">${item.sent}</div>
+          <button class="fc-back-btn" onclick="event.stopPropagation();speak('${item.word}')">🔊 Listen</button>
+        </div>
+      </div>`;
+    fc.onclick=()=>{
+      fc.classList.toggle('flipped');
+      if(fc.classList.contains('flipped')){
+        speak(item.word); learnWord(item.word); addStar();
+        spawnStars(fc); fc.classList.add('played');
+      }
+    };
+    g.appendChild(fc);
+  });
+}
+
+// ══════════ MATCHING GAME (Zone 2) ══════════
+let matchSel=null, matchDone=0;
+const matchData=[...COLORS.slice(0,5),...OBJECTS.slice(0,5),...SPACE.slice(0,4)];
+
+function buildMatch(){
+  matchSel=null; matchDone=0;
+  document.getElementById('match-score').textContent='';
+  const pool=[...matchData].sort(()=>Math.random()-.5).slice(0,6);
+  const left=document.getElementById('match-left');
+  const right=document.getElementById('match-right');
+  left.innerHTML=''; right.innerHTML='';
+  const shuffledRight=[...pool].sort(()=>Math.random()-.5);
+
+  pool.forEach(item=>{
+    const d=document.createElement('div');
+    d.className='match-item'; d.dataset.id=item.word;
+    d.innerHTML=`${item.e} <span>${item.e}</span>`;
+    d.textContent=item.e+' '+item.e;
+    d.innerHTML=`<span style="font-size:1.6rem">${item.e}</span>`;
+    d.dataset.side='left'; d.dataset.id=item.word;
+    d.onclick=()=>matchClick(d,'left',item.word);
+    left.appendChild(d);
+  });
+  shuffledRight.forEach(item=>{
+    const d=document.createElement('div');
+    d.className='match-item'; d.dataset.id=item.word; d.dataset.side='right';
+    d.innerHTML=`<span style="font-size:.9rem;font-family:'Orbitron',monospace;">${item.word}</span>`;
+    d.onclick=()=>matchClick(d,'right',item.word);
+    right.appendChild(d);
+  });
+}
+
+function matchClick(el,side,id){
+  if(el.classList.contains('matched')) return;
+  if(!matchSel){
+    document.querySelectorAll('.match-item.selected').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected'); matchSel={el,side,id}; return;
+  }
+  if(matchSel.side===side){
+    document.querySelectorAll('.match-item.selected').forEach(e=>e.classList.remove('selected'));
+    el.classList.add('selected'); matchSel={el,side,id}; return;
+  }
+  if(matchSel.id===id){
+    // correct
+    [matchSel.el,el].forEach(e=>{e.classList.remove('selected');e.classList.add('matched');});
+    speak(id); addStar(); learnWord(id); spawnStars(el);
+    matchDone++;
+    if(matchDone===document.querySelectorAll('#match-left .match-item').length){
+      document.getElementById('match-score').textContent='🎉 Mission Complete! All matched!';
+      showToast('🚀 Perfect! All matched! +'+matchDone+' stars!');
+    }
+  } else {
+    // wrong
+    [matchSel.el,el].forEach(e=>{e.classList.remove('selected');e.classList.add('wrong');
+      setTimeout(()=>e.classList.remove('wrong'),800);});
+    resetStreak();
+  }
+  matchSel=null;
+}
+
+// ══════════ SPEAKING (Zone 3) ══════════
+const SP_POOL=[...COLORS,...OBJECTS,...SPACE];
+let spCat='All',spIdx=0,spCorrect=0,spTotal=0;
+const spCats=['All','Colors','Objects','Space Words'];
+
+function buildSPCats(){
+  const c=document.getElementById('sp-cat-btns');
+  spCats.forEach(cat=>{
+    const btn=document.createElement('button');
+    btn.className='sp-cat-btn'+(cat==='All'?' active':'');
+    btn.textContent=cat;
+    btn.onclick=()=>{
+      spCat=cat; spIdx=0;
+      document.querySelectorAll('.sp-cat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); loadSP();
+    };
+    c.appendChild(btn);
+  });
+}
+function getSpPool(){
+  if(spCat==='All') return SP_POOL;
+  if(spCat==='Colors') return COLORS;
+  if(spCat==='Objects') return OBJECTS;
+  return SPACE;
+}
+function loadSP(){
+  const pool=getSpPool();
+  const item=pool[spIdx%pool.length];
+  document.getElementById('sp-emoji').textContent=item.e;
+  document.getElementById('sp-word').textContent=item.word;
+  document.getElementById('sp-frame').innerHTML=item.sent.replace(item.word,`<span class="blank">${item.word}</span>`);
+  document.getElementById('sp-fb').textContent='';
+  document.getElementById('sp-fb').className='speak-feedback';
+  speak(item.word);
+}
+function spListen(){speak(getSpPool()[spIdx%getSpPool().length].word);}
+function spCheck(ok){
+  spTotal++;
+  const fb=document.getElementById('sp-fb');
+  const item=getSpPool()[spIdx%getSpPool().length];
+  if(ok){
+    spCorrect++; fb.textContent='🚀 Great job, astronaut! You said it!'; fb.className='speak-feedback yes';
+    addStar(); learnWord(item.word);
+    spawnStars(document.querySelector('.speak-card')); speak('Great job astronaut!');
+  } else {
+    fb.textContent='🌌 Listen again and try! You can do it!'; fb.className='speak-feedback no';
+    speak(item.sent); resetStreak();
+  }
+  document.getElementById('sp-correct').textContent=spCorrect;
+  document.getElementById('sp-total').textContent=spTotal;
+}
+function spNext(){spIdx++;loadSP();}
+
+// ══════════ DRAWING (Zone 4) ══════════
+const drawPrompts=[
+  {label:'🚀 Rocket',    sent:'"This is a rocket. It is red."',    color:'#FF3CA0'},
+  {label:'🌕 Moon',      sent:'"The moon is white and big."',       color:'#E8F4FD'},
+  {label:'⭐ Star',      sent:'"This is a star. It is yellow."',    color:'#FFE500'},
+  {label:'🪐 Planet',    sent:'"The planet is blue and round."',    color:'#00D4FF'},
+  {label:'☀️ Sun',       sent:'"The sun is orange and hot."',       color:'#FF6B00'},
+  {label:'✏️ Pencil',    sent:'"This is a pencil. It is yellow."',  color:'#FFE500'},
+  {label:'📚 Book',      sent:'"The book is blue and big."',        color:'#00D4FF'},
+  {label:'🎒 Bag',       sent:'"This is a bag. It is red."',        color:'#FF3CA0'},
+];
+let drawIdx=0,drawColor='#00D4FF',drawing=false,dlx=0,dly=0;
+const dwc=document.getElementById('drawCanvas');
+const dctx=dwc.getContext('2d');
+dctx.lineWidth=8; dctx.lineCap='round'; dctx.lineJoin='round';
+
+function buildDrawWords(){
+  const c=document.getElementById('draw-words'); c.innerHTML='';
+  drawPrompts.forEach((p,i)=>{
+    const btn=document.createElement('button'); btn.className='draw-word-btn'+(i===drawIdx?' active':'');
+    btn.textContent=p.label;
+    btn.onclick=()=>{drawIdx=i;loadDrawPrompt();
+      document.querySelectorAll('.draw-word-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');};
+    c.appendChild(btn);
+  });
+}
+function loadDrawPrompt(){
+  const p=drawPrompts[drawIdx];
+  document.getElementById('draw-prompt').textContent='Draw this: '+p.label;
+  document.getElementById('draw-sent').textContent=p.sent;
+  speak(p.sent.replace(/['"]/g,''));
+}
+function nextDrawPrompt(){drawIdx=(drawIdx+1)%drawPrompts.length;buildDrawWords();loadDrawPrompt();}
+function clearDraw(){dctx.clearRect(0,0,dwc.width,dwc.height);}
+
+function getDPos(e){
+  const r=dwc.getBoundingClientRect();
+  const sx=dwc.width/r.width,sy=dwc.height/r.height;
+  if(e.touches) return[(e.touches[0].clientX-r.left)*sx,(e.touches[0].clientY-r.top)*sy];
+  return[(e.clientX-r.left)*sx,(e.clientY-r.top)*sy];
+}
+dwc.addEventListener('mousedown', e=>{drawingTrue(e);});
+dwc.addEventListener('mousemove', e=>{if(!drawingD) return; drawLine(e);});
+dwc.addEventListener('mouseup',   ()=>{drawingD=false;});
+dwc.addEventListener('mouseleave',()=>{drawingD=false;});
+dwc.addEventListener('touchstart',e=>{e.preventDefault();drawingTrue(e);},{passive:false});
+dwc.addEventListener('touchmove', e=>{e.preventDefault();if(!drawingD) return;drawLine(e);},{passive:false});
+dwc.addEventListener('touchend',  ()=>{drawingD=false;});
+let drawingD=false;
+function drawingTrue(e){drawingD=true;[dlx,dly]=getDPos(e);}
+function drawLine(e){
+  const[x,y]=getDPos(e);
+  dctx.beginPath();dctx.moveTo(dlx,dly);dctx.lineTo(x,y);
+  dctx.strokeStyle=drawColor;dctx.stroke();[dlx,dly]=[x,y];
+}
+document.querySelectorAll('.draw-color').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.draw-color').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); drawColor=btn.dataset.color;
+  });
+});
+
+// ══════════ QUIZ ══════════
+const QUIZ=[
+  {q:'What color is this? 🔴',hint:'Look at the emoji!',opts:['Red','Blue','Green','Yellow'],ans:0},
+  {q:'What is this? ✏️',hint:'You use it to write!',opts:['Book','Chair','Pencil','Bag'],ans:2},
+  {q:'What color is this? 🔵',hint:'Like the sky!',opts:['Green','Yellow','Red','Blue'],ans:3},
+  {q:'The ___ is blue. (🎒)',hint:'Complete the sentence!',opts:['pencil','book','bag','chair'],ans:2},
+  {q:'What is this? 📚',hint:'You read this!',opts:['Pencil','Book','Ruler','Pen'],ans:1},
+  {q:'It is ___. 🟡',hint:'Color of the sun!',opts:['Purple','Orange','Yellow','Green'],ans:2},
+  {q:'What is this? 🚀',hint:'It flies to space!',opts:['Moon','Star','Planet','Rocket'],ans:3},
+  {q:'What color is this? 🟢',hint:'Like grass!',opts:['Blue','Green','Red','Black'],ans:1},
+  {q:'The ___ is yellow. (✏️)',hint:'Object in your pencil case!',opts:['book','chair','bag','pencil'],ans:3},
+  {q:'What is this? ⭐',hint:'It shines at night!',opts:['Sun','Moon','Star','Planet'],ans:2},
+];
+let qIdx=0,qScore=0;
+
+function buildQuiz(){
+  const dots=document.getElementById('quiz-dots');
+  dots.innerHTML=QUIZ.map((_,i)=>`<div class="quiz-dot${i===0?' current':''}" id="qd${i}"></div>`).join('');
+  renderQ();
+}
+function renderQ(){
+  if(qIdx>=QUIZ.length){showQuizEnd();return;}
+  const q=QUIZ[qIdx];
+  document.querySelectorAll('.quiz-dot').forEach((d,i)=>{
+    d.classList.toggle('done',i<qIdx);d.classList.toggle('current',i===qIdx);
+  });
+  document.getElementById('quiz-body').innerHTML=`
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-hint">${q.hint}</div>
+    <div class="quiz-opts" id="quiz-opts">
+      ${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="checkQ(${i},${q.ans},this)">${o}</button>`).join('')}
+    </div>
+    <div class="quiz-feedback" id="quiz-fb"></div>
+    <div class="quiz-nav">
+      <button class="btn-primary" style="font-size:.72rem;padding:11px 24px;display:none;" id="quiz-next" onclick="nextQ()">Next ▶</button>
+    </div>`;
+  speak(q.q.replace(/[^\w\s?]/g,''));
+}
+function checkQ(chosen,ans,btn){
+  document.querySelectorAll('.quiz-opt').forEach(b=>b.style.pointerEvents='none');
+  const fb=document.getElementById('quiz-fb');
+  gQuiz.t++;
+  if(chosen===ans){
+    btn.classList.add('correct'); fb.textContent='🚀 Correct! Great job, astronaut!'; fb.className='quiz-feedback ok';
+    qScore++; gQuiz.c++; addStar(2); spawnStars(btn); speak('Correct! Great job!');
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.quiz-opt')[ans].classList.add('correct');
+    fb.textContent='🌌 Not quite! The answer is: '+QUIZ[qIdx].opts[ans]; fb.className='quiz-feedback bad';
+    resetStreak();
+  }
+  upScore();
+  document.getElementById('quiz-next').style.display='inline-block';
+}
+function nextQ(){qIdx++;renderQ();}
+function showQuizEnd(){
+  const pct=Math.round(qScore/QUIZ.length*100);
+  document.getElementById('quiz-body').innerHTML=`
+    <div class="quiz-score-display">
+      <div class="big-num">${qScore}/${QUIZ.length}</div>
+      <p style="font-size:1.2rem;color:var(--neon-yellow);margin-top:8px;">${pct}% — ${pct>=80?'🚀 Mission Accomplished!':pct>=50?'🌌 Good effort, keep going!':'🌠 Practice more and try again!'}</p>
+      <p style="margin-top:16px;color:var(--text-body);">You earned <strong style="color:var(--neon-blue);">${qScore*2} stars</strong> in this quiz!</p>
+      <button class="btn-primary" style="margin-top:28px;font-size:.78rem;padding:13px 28px;" onclick="restartQuiz()">🔄 Try Again</button>
+    </div>`;
+  speak('Quiz complete! You scored '+qScore+' out of '+QUIZ.length);
+}
+function restartQuiz(){qIdx=0;qScore=0;buildQuiz();}
+
+// ══════════ VOCABULARY ══════════
+function buildVocab(){
+  const tabs=document.getElementById('vocab-tabs');
+  const panels=document.getElementById('vocab-panels');
+  Object.keys(ALL_VOCAB).forEach((cat,ci)=>{
+    const tab=document.createElement('button');
+    tab.className='vocab-tab'+(ci===0?' active':'');
+    tab.textContent=cat;
+    tab.onclick=()=>{
+      document.querySelectorAll('.vocab-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.vocab-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('vp-'+ci).classList.add('active');
+    };
+    tabs.appendChild(tab);
+
+    const panel=document.createElement('div');
+    panel.className='vocab-panel'+(ci===0?' active':'');
+    panel.id='vp-'+ci;
+    ALL_VOCAB[cat].forEach(item=>{
+      const c=document.createElement('div'); c.className='vocab-card';
+      c.innerHTML=`<span class="vocab-emoji">${item.e}</span>
+        <div class="vocab-word">${item.word}</div>
+        <div class="vocab-sent">${item.sent}</div>`;
+      c.onclick=()=>{speak(item.sent);learnWord(item.word);c.classList.add('played');addStar();spawnStars(c);};
+      panel.appendChild(c);
+    });
+    panels.appendChild(panel);
+  });
+}
+
+// ══════════ ACTIVITY SWITCHER ══════════
+function switchAct(zone,btn){
+  document.querySelectorAll('.act-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.act-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('act-'+zone).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ══════════ INIT ══════════
+buildFCControls(); buildFCGrid();
+buildMatch();
+buildSPCats(); loadSP();
+buildDrawWords(); loadDrawPrompt();
+buildQuiz();
+buildVocab();
+</script>
+</body>
+</html>
